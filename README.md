@@ -5,7 +5,6 @@ on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles).
 
 ## How to run
 
-Using pre-built docker image:
 
 ```bash
 docker run --rm -v "$(pwd)/data":/data openmaptiles/planetiler-openmaptiles:latest --force --download --area=monaco
