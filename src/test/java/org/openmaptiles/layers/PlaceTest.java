@@ -451,7 +451,7 @@ class PlaceTest extends AbstractLayerTest {
       "capital", 6,
 
       "_type", "point",
-      "_minzoom", 6
+      "_minzoom", 4
     )), process(pointFeature(
       Map.of(
         "place", "city",
