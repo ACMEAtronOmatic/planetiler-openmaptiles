@@ -558,7 +558,7 @@ class PlaceTest extends AbstractLayerTest {
       ))));
   }
 
-    @Test
+  @Test
   void testTown() {
     process(SimpleFeature.create(
       newPoint(0, 0),
