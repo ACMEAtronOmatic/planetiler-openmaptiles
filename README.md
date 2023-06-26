@@ -5,7 +5,6 @@ on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles).
 
 ## How to run
 
-
 To build from source, after [installing Java 17+](https://adoptium.net/installation.html):
 
 ```bash
