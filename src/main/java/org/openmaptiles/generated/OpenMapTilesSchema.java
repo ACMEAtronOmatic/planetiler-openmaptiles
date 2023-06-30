@@ -696,6 +696,7 @@ public class OpenMapTilesSchema {
        * </ul>
        */
       public static final String DISPUTED = "disputed";
+      public static final String COUNTRY_CODE_A3 = "ISO3166-1";
 
       /**
        * Field containing name of the disputed area (extracted from border relation in OSM, without spaces). For country

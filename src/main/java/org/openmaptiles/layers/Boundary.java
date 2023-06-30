@@ -170,16 +170,17 @@ public class Boundary implements
       return;
     }
     boolean disputed = feature.getString("featurecla", "").startsWith("Disputed");
-    record BoundaryInfo(int adminLevel, int minzoom, int maxzoom) {}
+    record BoundaryInfo(int adminLevel, int minzoom, int maxzoom, String iso_a3) {}
     BoundaryInfo info = switch (table) {
-      case "ne_110m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 0, 0);
-      case "ne_50m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 1, 3);
+      case "ne_110m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 0, 0, null);
+      case "ne_50m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 1, 3, null);
       case "ne_10m_admin_0_boundary_lines_land" -> feature.hasTag("featurecla", "Lease Limit") ? null :
-        new BoundaryInfo(2, 4, 4);
+        new BoundaryInfo(2, 4, 4, null);
       case "ne_10m_admin_1_states_provinces_lines" -> {
         Double minZoom = Parse.parseDoubleOrNull(feature.getTag("min_zoom"));
-        yield minZoom != null && minZoom <= 7 ? new BoundaryInfo(4, 1, 4) :
-          minZoom != null && minZoom <= 7.7 ? new BoundaryInfo(4, 4, 4) :
+        String iso_a3 = feature.getString("adm0_a3");
+        yield minZoom != null && minZoom <= 7 ? new BoundaryInfo(4, 1, 4, iso_a3) :
+          minZoom != null && minZoom <= 7.7 ? new BoundaryInfo(4, 4, 4, iso_a3) :
           null;
       }
       default -> null;
@@ -190,6 +191,7 @@ public class Boundary implements
         .setMinPixelSizeAtAllZooms(0)
         .setAttr(Fields.ADMIN_LEVEL, info.adminLevel)
         .setAttr(Fields.MARITIME, 0)
+        .setAttr(Fields.COUNTRY_CODE_A3, info.iso_a3)
         .setAttr(Fields.DISPUTED, disputed ? 1 : 0);
     }
   }
