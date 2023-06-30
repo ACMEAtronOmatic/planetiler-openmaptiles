@@ -254,13 +254,15 @@ class BoundaryTest extends AbstractLayerTest {
     relation2.setTag("admin_level", "4");
     relation2.setTag("name", "State");
     relation2.setTag("boundary", "administrative");
+    relation2.setTag("ISO3166-2", "US-CA");
 
     assertFeatures(14, List.of(Map.of(
       "_layer", "boundary",
       "_type", "line",
       "disputed", 0,
       "maritime", 0,
-      "admin_level", 4
+      "admin_level", 4,
+      "ISO3166-2", "US-CA"
     )), process(lineFeatureWithRelation(
       Stream.concat(
         profile.preprocessOsmRelation(relation2).stream(),

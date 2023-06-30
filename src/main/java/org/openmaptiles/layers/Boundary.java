@@ -203,6 +203,7 @@ public class Boundary implements
       relation.hasTag("boundary", "administrative")) {
       Integer adminLevelValue = Parse.parseRoundInt(relation.getTag("admin_level"));
       String code = relation.getString("ISO3166-1:alpha3");
+      String iso_a2 = relation.getString("ISO3166-2");
       if (adminLevelValue != null && adminLevelValue >= 2 && adminLevelValue <= 10) {
         boolean disputed = isDisputed(relation.tags());
         if (code != null) {
@@ -214,7 +215,8 @@ public class Boundary implements
           disputed,
           relation.getString("name"),
           disputed ? relation.getString("claimed_by") : null,
-          code
+          code,
+          iso_a2
         ));
       }
     }
@@ -230,6 +232,7 @@ public class Boundary implements
     if (!relationInfos.isEmpty()) {
       int minAdminLevel = Integer.MAX_VALUE;
       String disputedName = null, claimedBy = null;
+      String iso_a2 = null;
       Set<Long> regionIds = new HashSet<>();
       boolean disputed = false;
       // aggregate all borders this way is a part of - take the lowest
@@ -247,6 +250,9 @@ public class Boundary implements
         if (minAdminLevel == 2 && regionNames.containsKey(info.relation().id)) {
           regionIds.add(info.relation().id);
         }
+        if (minAdminLevel == 4 && iso_a2 == null) {
+        iso_a2 = rel.iso3166_2;
+       }
       }
 
       if (minAdminLevel <= 10) {
@@ -301,6 +307,7 @@ public class Boundary implements
             .setMinPixelSizeAtAllZooms(0)
             .setMinZoom(minzoom)
             .setAttr(Fields.CLAIMED_BY, claimedBy)
+            .setAttr(Fields.COUNTRY_CODE_A2, iso_a2)
             .setAttr(Fields.DISPUTED_NAME, editName(disputedName));
         }
       }
@@ -458,7 +465,8 @@ public class Boundary implements
     boolean disputed,
     String name,
     String claimedBy,
-    String iso3166alpha3
+    String iso3166alpha3,
+    String iso3166_2
   ) implements OsmRelationInfo {
 
     @Override
