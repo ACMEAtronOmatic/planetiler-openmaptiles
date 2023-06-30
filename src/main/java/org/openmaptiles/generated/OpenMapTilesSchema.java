@@ -733,6 +733,7 @@ public class OpenMapTilesSchema {
        * </ul>
        */
       public static final String DISPUTED = "disputed";
+      public static final String COUNTRY_CODE_A2 = "ISO3166-2";
       public static final String COUNTRY_CODE_A3 = "ISO3166-1";
 
       /**
