@@ -251,8 +251,8 @@ public class Boundary implements
           regionIds.add(info.relation().id);
         }
         if (minAdminLevel == 4 && iso_a2 == null) {
-        iso_a2 = rel.iso3166_2;
-       }
+          iso_a2 = rel.iso3166_2;
+        }
       }
 
       if (minAdminLevel <= 10) {
