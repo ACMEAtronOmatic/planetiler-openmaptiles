@@ -146,6 +146,15 @@ public class WaterName implements
         }
       }
     }
+    // world lakes
+    if ("ne_10m_lakes".equals(table)) {
+      String name = feature.getString("name");
+      Integer minLabel = Parse.parseIntOrNull(feature.getTag("min_label"));
+      if (name != null && minLabel != null) {
+        name = name.replaceAll("\\s+", " ").trim().toLowerCase();
+        importantMarinePoints.put(name, minLabel);
+      }
+    }
   }
 
   private NaturalEarthRegion getImportantMarineRegion(Tables.OsmMarinePoint element) {
