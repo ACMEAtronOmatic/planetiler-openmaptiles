@@ -136,6 +136,15 @@ public class WaterName implements
         importantMarinePoints.put(name, scalerank);
       }
     }
+    // world lakes
+    if ("ne_10m_lakes".equals(table)) {
+      String name = feature.getString("name");
+      Integer minLabel = Parse.parseIntOrNull(feature.getTag("min_label"));
+      if (name != null && minLabel != null) {
+        name = name.replaceAll("\\s+", " ").trim().toLowerCase();
+        importantMarinePoints.put(name, minLabel);
+      }
+    }
   }
 
   @Override
@@ -175,7 +184,23 @@ public class WaterName implements
       try {
         Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
         FeatureCollector.Feature feature;
-        int minzoom = 9;
+        var source = element.source();
+        Integer minLabel;
+        String name = element.name().toLowerCase();
+        Integer defaultMin = 9;
+        if ((minLabel = importantMarinePoints.get(name)) != null) {
+          defaultMin = minLabel;
+        } else if ((minLabel = importantMarinePoints.get(source.getString("name:en", "").toLowerCase())) != null) {
+          defaultMin = minLabel;
+        } else if ((minLabel = importantMarinePoints.get(source.getString("name:es", "").toLowerCase())) != null) {
+          defaultMin = minLabel;
+        } else {
+          Map.Entry<String, Integer> next = importantMarinePoints.ceilingEntry(name);
+          if (next != null && next.getKey().startsWith(name)) {
+            defaultMin = next.getValue();
+          }
+        }
+        Integer minzoom = defaultMin;
         if (centerlineGeometry != null) {
           // prefer lake centerline if it exists
           feature = features.geometry(LAYER_NAME, centerlineGeometry)
@@ -185,8 +210,11 @@ public class WaterName implements
           feature = features.pointOnSurface(LAYER_NAME);
           Geometry geometry = element.source().worldGeometry();
           double area = geometry.getArea();
-          minzoom = (int) Math.floor(20 - Math.log(area / WORLD_AREA_FOR_70K_SQUARE_METERS) / LOG2);
-          minzoom = Math.min(14, Math.max(9, minzoom));
+          if (defaultMin == 9) {
+            // use a formula to guess a minzoom based on the area of the lake
+            minzoom = (int) Math.floor(20 - Math.log(area / WORLD_AREA_FOR_70K_SQUARE_METERS) / LOG2);
+            minzoom = Math.min(14, Math.max(9, minzoom));
+          }
         }
         feature
           .setAttr(Fields.CLASS, FieldValues.CLASS_LAKE)
