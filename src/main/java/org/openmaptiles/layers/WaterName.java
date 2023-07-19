@@ -138,11 +138,12 @@ public class WaterName implements
     }
     // world lakes
     if ("ne_10m_lakes".equals(table)) {
-      String name = feature.getString("name");
+      String wikiId = feature.getString("wikidataid");
       Integer minLabel = Parse.parseIntOrNull(feature.getTag("min_label"));
-      if (name != null && minLabel != null) {
-        name = name.replaceAll("\\s+", " ").trim().toLowerCase();
-        importantMarinePoints.put(name, minLabel);
+      if (wikiId != null && minLabel != null) {
+        //wikiId = wikiId.replaceAll("\\s+", " ").trim();
+        // todo: use importantLakes
+        importantMarinePoints.put(wikiId, 0);
       }
     }
   }
@@ -185,18 +186,21 @@ public class WaterName implements
         Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
         FeatureCollector.Feature feature;
         var source = element.source();
+        String wikiId = source.getString("wikidata");
         Integer minLabel;
+        if (wikiId != null) {
+          minLabel = importantMarinePoints.get(wikiId);
+        }
+        else {
+          minLabel = null;
+        }
         String name = element.name().toLowerCase();
         Integer defaultMin = 9;
-        if ((minLabel = importantMarinePoints.get(name)) != null) {
+        if (minLabel != null) {
           defaultMin = minLabel;
-        } else if ((minLabel = importantMarinePoints.get(source.getString("name:en", "").toLowerCase())) != null) {
-          defaultMin = minLabel;
-        } else if ((minLabel = importantMarinePoints.get(source.getString("name:es", "").toLowerCase())) != null) {
-          defaultMin = minLabel;
-        } else {
-          Map.Entry<String, Integer> next = importantMarinePoints.ceilingEntry(name);
-          if (next != null && next.getKey().startsWith(name)) {
+        } else if (wikiId != null) {
+          Map.Entry<String, Integer> next = importantMarinePoints.ceilingEntry(wikiId);
+          if (next != null && next.getKey().startsWith(wikiId)) {
             defaultMin = next.getValue();
           }
         }
