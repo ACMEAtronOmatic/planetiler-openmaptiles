@@ -21,7 +21,8 @@ class WaterNameTest extends AbstractLayerTest {
       newLineString(0, 0, 1, 1),
       new HashMap<>(Map.<String, Object>of(
         "min_label", 3,
-        "name", "Lake Superior"
+        "name", "Lake Superior",
+        "wikidataid", "Q123"
       )),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_10m_lakes",
@@ -32,7 +33,8 @@ class WaterNameTest extends AbstractLayerTest {
       newLineString(0, 0, 1, 1),
       new HashMap<>(Map.<String, Object>of(
         "min_label", 4,
-        "name", "Réservoir Manicouagan"
+        "name", "Réservoir Manicouagan",
+        "wikidataid", "Q456"
       )),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_10m_lakes",
@@ -48,13 +50,14 @@ class WaterNameTest extends AbstractLayerTest {
       "name:es", "Superior",
       "_layer", "water_name",
       "_type", "point",
-      "_minzoom", 3,
+      "_minzoom", 0,
       "_maxzoom", 14
     )), process(polygonFeatureWithArea(1, Map.of(
       "name", "Lake Superior",
       "name:es", "Superior",
       "natural", "water",
-      "water", "lake"
+      "water", "lake",
+      "wikidata", "Q123"
     ))));
 
     // name match reservoir - use min_label from NE
@@ -66,13 +69,14 @@ class WaterNameTest extends AbstractLayerTest {
       "name:es", "Manicouagan",
       "_layer", "water_name",
       "_type", "point",
-      "_minzoom", 4,
+      "_minzoom", 0,
       "_maxzoom", 14
     )), process(polygonFeatureWithArea(1, Map.of(
       "name", "Réservoir Manicouagan",
       "name:es", "Manicouagan",
       "natural", "water",
-      "water", "reservoir"
+      "water", "reservoir",
+      "wikidata", "Q456"
     ))));
 
     assertFeatures(11, List.of(Map.of(
@@ -115,7 +119,8 @@ class WaterNameTest extends AbstractLayerTest {
       newLineString(0, 0, 1, 1),
       new HashMap<>(Map.<String, Object>of(
         "min_label", 3,
-        "name", "Lake Superior"
+        "name", "Lake Superior",
+        "wikidataid", "Q098"
       )),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_10m_lakes",
@@ -142,7 +147,7 @@ class WaterNameTest extends AbstractLayerTest {
       "_layer", "water_name",
       "_type", "line",
       "_geom", new TestUtils.NormGeometry(GeoUtils.latLonToWorldCoords(newLineString(0, 0, 1, 1))),
-      "_minzoom", 3,
+      "_minzoom", 0,
       "_maxzoom", 14,
       "_minpixelsize", "Lake Superior".length() * 6d
     )), process(SimpleFeature.create(
@@ -151,7 +156,8 @@ class WaterNameTest extends AbstractLayerTest {
         "name", "Lake Superior",
         "name:es", "Superior",
         "natural", "water",
-        "water", "lake"
+        "water", "lake",
+        "wikidata", "Q098"
       )),
       OpenMapTilesProfile.OSM_SOURCE,
       null,
