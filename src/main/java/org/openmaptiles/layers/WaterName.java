@@ -148,11 +148,12 @@ public class WaterName implements
     }
     // world lakes
     if ("ne_10m_lakes".equals(table)) {
-      String name = feature.getString("name");
+      String wikiId = feature.getString("wikidataid");
       Integer minLabel = Parse.parseIntOrNull(feature.getTag("min_label"));
-      if (name != null && minLabel != null) {
-        name = name.replaceAll("\\s+", " ").trim().toLowerCase();
-        importantMarinePoints.put(name, minLabel);
+      if (wikiId != null && minLabel != null) {
+        //wikiId = wikiId.replaceAll("\\s+", " ").trim();
+        // todo: use importantLakes
+        importantMarinePoints.put(wikiId, 0);
       }
     }
   }
