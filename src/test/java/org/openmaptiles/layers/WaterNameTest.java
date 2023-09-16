@@ -17,67 +17,37 @@ class WaterNameTest extends AbstractLayerTest {
 
   @Test
   void testWaterNamePoint() {
-    assertFeatures(11, List.of(), process(SimpleFeature.create(
-      newLineString(0, 0, 1, 1),
-      new HashMap<>(Map.<String, Object>of(
-        "min_label", 3,
-        "name", "Lake Superior",
-        "wikidataid", "Q123"
-      )),
-      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
-      "ne_10m_lakes",
-      0
-    )));
-
-    assertFeatures(11, List.of(), process(SimpleFeature.create(
+  // null name not included
+    assertFeatures(6, List.of(), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
       new HashMap<>(Map.<String, Object>of(
         "min_label", 4,
-        "name", "Réservoir Manicouagan",
+        "scalerank", 1,
         "wikidataid", "Q456"
       )),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_10m_lakes",
       0
     )));
-
-    // name match - use min_label from NE
-    assertFeatures(10, List.of(Map.of(
-      "_layer", "water"
-    ), Map.of(
-      "class", "lake",
-      "name", "Lake Superior",
-      "name:es", "Superior",
+    assertFeatures(11, List.of(Map.of(
       "_layer", "water_name",
       "_type", "point",
-      "_minzoom", 0,
-      "_maxzoom", 14
-    )), process(polygonFeatureWithArea(1, Map.of(
-      "name", "Lake Superior",
-      "name:es", "Superior",
-      "natural", "water",
-      "water", "lake",
-      "wikidata", "Q123"
-    ))));
-
-    // name match reservoir - use min_label from NE
-    assertFeatures(10, List.of(Map.of(
-      "_layer", "water"
-    ), Map.of(
-      "class", "lake",
-      "name", "Réservoir Manicouagan",
-      "name:es", "Manicouagan",
-      "_layer", "water_name",
-      "_type", "point",
-      "_minzoom", 0,
-      "_maxzoom", 14
-    )), process(polygonFeatureWithArea(1, Map.of(
-      "name", "Réservoir Manicouagan",
-      "name:es", "Manicouagan",
-      "natural", "water",
-      "water", "reservoir",
-      "wikidata", "Q456"
-    ))));
+      "scalerank", 2,
+      "_minzoom", 3,
+      "world_lake", true,
+      "name", "Lake Superior"
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      new HashMap<>(Map.<String, Object>of(
+        "min_label", 3,
+        "name", "Lake Superior",
+        "wikidataid", "Q123",
+        "scalerank", 2
+      )),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_lakes",
+      0
+    )));
 
     assertFeatures(11, List.of(Map.of(
       "_layer", "water"
@@ -118,52 +88,12 @@ class WaterNameTest extends AbstractLayerTest {
     assertFeatures(11, List.of(), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
       new HashMap<>(Map.<String, Object>of(
-        "min_label", 3,
-        "name", "Lake Superior",
-        "wikidataid", "Q098"
-      )),
-      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
-      "ne_10m_lakes",
-      0
-    )));
-
-    assertFeatures(11, List.of(), process(SimpleFeature.create(
-      newLineString(0, 0, 1, 1),
-      new HashMap<>(Map.<String, Object>of(
         "OSM_ID", -10
       )),
       OpenMapTilesProfile.LAKE_CENTERLINE_SOURCE,
       null,
       0
     )));
-
-    // name match - use min_label from NE
-    assertFeatures(10, List.of(Map.of(
-      "_layer", "water"
-    ), Map.of(
-      "name", "Lake Superior",
-      "name:es", "Superior",
-
-      "_layer", "water_name",
-      "_type", "line",
-      "_geom", new TestUtils.NormGeometry(GeoUtils.latLonToWorldCoords(newLineString(0, 0, 1, 1))),
-      "_minzoom", 0,
-      "_maxzoom", 14,
-      "_minpixelsize", "Lake Superior".length() * 6d
-    )), process(SimpleFeature.create(
-      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1))),
-      new HashMap<>(Map.<String, Object>of(
-        "name", "Lake Superior",
-        "name:es", "Superior",
-        "natural", "water",
-        "water", "lake",
-        "wikidata", "Q098"
-      )),
-      OpenMapTilesProfile.OSM_SOURCE,
-      null,
-      10
-    )));
-
     assertFeatures(10, List.of(Map.of(
       "_layer", "water"
     ), Map.of(
