@@ -138,12 +138,18 @@ public class WaterName implements
     }
     // world lakes
     if ("ne_10m_lakes".equals(table)) {
-      String wikiId = feature.getString("wikidataid");
-      Integer minLabel = Parse.parseIntOrNull(feature.getTag("min_label"));
-      if (wikiId != null && minLabel != null) {
-        //wikiId = wikiId.replaceAll("\\s+", " ").trim();
-        // todo: use importantLakes
-        importantMarinePoints.put(wikiId, 0);
+      String name = feature.getString("name");
+      Integer scalerank = Parse.parseIntOrNull(feature.getTag("scalerank"));
+      if (name != null && scalerank != null) {
+        Integer minLabel = Parse.parseIntOrNull(feature.getTag("min_label"));
+        features.pointOnSurface(LAYER_NAME)
+        .setAttr(Fields.CLASS, FieldValues.CLASS_LAKE)
+        .setBufferPixels(BUFFER_SIZE)
+        .putAttrs(OmtLanguageUtils.getNames(feature.tags(), translations))
+        .setAttr(Fields.INTERMITTENT, 0)
+        .setAttr(Fields.WORLD_LAKE, true)
+        .setAttr(Fields.SCALERANK, scalerank)
+        .setMinZoom(minLabel);
       }
     }
   }
@@ -185,26 +191,7 @@ public class WaterName implements
       try {
         Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
         FeatureCollector.Feature feature;
-        var source = element.source();
-        String wikiId = source.getString("wikidata");
-        Integer minLabel;
-        if (wikiId != null) {
-          minLabel = importantMarinePoints.get(wikiId);
-        }
-        else {
-          minLabel = null;
-        }
-        String name = element.name().toLowerCase();
-        Integer defaultMin = 9;
-        if (minLabel != null) {
-          defaultMin = minLabel;
-        } else if (wikiId != null) {
-          Map.Entry<String, Integer> next = importantMarinePoints.ceilingEntry(wikiId);
-          if (next != null && next.getKey().startsWith(wikiId)) {
-            defaultMin = next.getValue();
-          }
-        }
-        Integer minzoom = defaultMin;
+        int minzoom = 9;
         if (centerlineGeometry != null) {
           // prefer lake centerline if it exists
           feature = features.geometry(LAYER_NAME, centerlineGeometry)
@@ -214,11 +201,9 @@ public class WaterName implements
           feature = features.pointOnSurface(LAYER_NAME);
           Geometry geometry = element.source().worldGeometry();
           double area = geometry.getArea();
-          if (defaultMin == 9) {
-            // use a formula to guess a minzoom based on the area of the lake
-            minzoom = (int) Math.floor(20 - Math.log(area / WORLD_AREA_FOR_70K_SQUARE_METERS) / LOG2);
-            minzoom = Math.min(14, Math.max(9, minzoom));
-          }
+          // use a formula to guess a minzoom based on the area of the lake
+          minzoom = (int) Math.floor(20 - Math.log(area / WORLD_AREA_FOR_70K_SQUARE_METERS) / LOG2);
+          minzoom = Math.min(14, Math.max(9, minzoom));
         }
         feature
           .setAttr(Fields.CLASS, FieldValues.CLASS_LAKE)
