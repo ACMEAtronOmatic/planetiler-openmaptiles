@@ -143,13 +143,13 @@ public class WaterName implements
       if (name != null && scalerank != null) {
         Integer minLabel = Parse.parseIntOrNull(feature.getTag("min_label"));
         features.pointOnSurface(LAYER_NAME)
-        .setAttr(Fields.CLASS, FieldValues.CLASS_LAKE)
-        .setBufferPixels(BUFFER_SIZE)
-        .putAttrs(OmtLanguageUtils.getNames(feature.tags(), translations))
-        .setAttr(Fields.INTERMITTENT, 0)
-        .setAttr(Fields.WORLD_LAKE, true)
-        .setAttr(Fields.SCALERANK, scalerank)
-        .setMinZoom(minLabel);
+          .setAttr(Fields.CLASS, FieldValues.CLASS_LAKE)
+          .setBufferPixels(BUFFER_SIZE)
+          .putAttrs(OmtLanguageUtils.getNames(feature.tags(), translations))
+          .setAttr(Fields.INTERMITTENT, 0)
+          .setAttr(Fields.WORLD_LAKE, true)
+          .setAttr(Fields.SCALERANK, scalerank)
+          .setMinZoom(minLabel);
       }
     }
   }
