@@ -17,7 +17,7 @@ class WaterNameTest extends AbstractLayerTest {
 
   @Test
   void testWaterNamePoint() {
-  // null name not included
+    // null name not included
     assertFeatures(6, List.of(), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
       new HashMap<>(Map.<String, Object>of(
