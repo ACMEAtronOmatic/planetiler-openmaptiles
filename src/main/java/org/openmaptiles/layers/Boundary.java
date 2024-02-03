@@ -277,6 +277,7 @@ public class Boundary implements
           // save for later
           try {
             CountryBoundaryComponent component = new CountryBoundaryComponent(
+              feature.id(),
               minAdminLevel,
               disputed,
               maritime,
@@ -332,7 +333,7 @@ public class Boundary implements
           if (merged instanceof LineString lineString) {
             BorderingRegions borderingRegions = getBorderingRegions(countryBoundaries, key.regions, lineString);
 
-            var features = featureCollectors.get(SimpleFeature.fromWorldGeometry(lineString));
+            var features = featureCollectors.get(SimpleFeature.fromWorldGeometry(lineString, key.id));
             var newFeature = features.line(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
               .setAttr(Fields.ADMIN_LEVEL, key.adminLevel)
               .setAttr(Fields.DISPUTED, key.disputed ? 1 : 0)
@@ -481,6 +482,7 @@ public class Boundary implements
    * Information to hold onto from processing a way in a boundary relation to determine the left/right region ID later.
    */
   private record CountryBoundaryComponent(
+    long id,
     int adminLevel,
     boolean disputed,
     boolean maritime,
@@ -492,7 +494,7 @@ public class Boundary implements
   ) {
 
     CountryBoundaryComponent groupingKey() {
-      return new CountryBoundaryComponent(adminLevel, disputed, maritime, minzoom, null, regions, claimedBy, name);
+      return new CountryBoundaryComponent(id, adminLevel, disputed, maritime, minzoom, null, regions, claimedBy, name);
     }
   }
 }
