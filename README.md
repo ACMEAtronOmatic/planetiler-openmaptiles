@@ -5,7 +5,7 @@ on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles).
 
 ## How to run
 
-To build from source, after [installing Java 17+](https://adoptium.net/installation.html):
+Or to build from source, after [installing Java 21+](https://adoptium.net/installation.html):
 
 ```bash
 # Build the project (use mvnw.cmd on windows):
@@ -20,11 +20,11 @@ available options.
 ## Differences from OpenMapTiles
 
 - Road name abbreviations are not implemented yet in the `transportation_name` layer
-- `agg_stop` tag not implemented yet in the `poi` layer
 - `brunnel` tag is excluded from `transportation_name` layer to avoid breaking apart long `transportation_name`
   lines, to revert this behavior set `--transportation-name-brunnel=true`
 - `rank` field on `mountain_peak` linestrings only has 3 levels (1: has wikipedia page and name, 2: has name, 3: no name
   or wikipedia page or name)
+- some line and polygon tolerances are different, can be tweaked with `--simplify-tolerance` parameter
 
 ## Customizing
 
@@ -39,7 +39,7 @@ the [layers package](src/main/java/org/openmaptiles/layers), and make a change t
 Example adding an attribute to a built-in layer
 </summary>
 
-For example to copy over the source attribute from OpenStreetMap elements to the building layer,
+For example to copy over the name attribute from OpenStreetMap elements to the building layer,
 modify [Building.java](src/main/java/org/openmaptiles/layers/Building.java):
 
 ```diff
@@ -47,7 +47,7 @@ modify [Building.java](src/main/java/org/openmaptiles/layers/Building.java):
          .setAttrWithMinzoom(Fields.RENDER_MIN_HEIGHT, renderMinHeight, 14)
          .setAttrWithMinzoom(Fields.COLOUR, color, 14)
          .setAttrWithMinzoom(Fields.HIDE_3D, hide3d, 14)
-+        .setAttrWithMinzoom("source", element.source().getTag("source"), 14)
++        .setAttrWithMinzoom("name", element.source().getTag("name"), 14)
          .setSortKey(renderHeight);
        if (mergeZ13Buildings) {
          feature
