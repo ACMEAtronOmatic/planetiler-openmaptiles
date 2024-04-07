@@ -499,7 +499,12 @@ public class Transportation implements
         return;
       }
       var minZoomAndNewClass = getMinzoomAndClass(element, highwayClass);
-      int minzoom = minZoomAndNewClass.minzoom;
+      int minzoom;
+      if (networkType == RouteNetwork.US_INTERSTATE) {
+        minzoom = 3;
+      } else {
+        minzoom = minZoomAndNewClass.minzoom;
+      }
 
       if (minzoom > config.maxzoom()) {
         return;
