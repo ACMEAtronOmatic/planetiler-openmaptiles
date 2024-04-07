@@ -426,7 +426,12 @@ public class Transportation implements
       if (isPierPolygon(element)) {
         return;
       }
-      int minzoom = getMinzoom(element, highwayClass);
+      int minzoom;
+      if (networkType == RouteNetwork.US_INTERSTATE) {
+        minzoom = 3;
+      } else {
+        minzoom = getMinzoom(element, highwayClass);
+      }
 
       if (minzoom > config.maxzoom()) {
         return;
