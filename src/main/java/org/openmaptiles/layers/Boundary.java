@@ -179,8 +179,8 @@ public class Boundary implements
     boolean disputed = feature.getString("featurecla", "").startsWith("Disputed");
     record BoundaryInfo(int adminLevel, int minzoom, int maxzoom, String iso_a3) {}
     BoundaryInfo info = switch (table) {
-      case "ne_110m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 0, 0);
-      case "ne_50m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 1, 3);
+      case "ne_110m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 0, 0, null);
+      case "ne_50m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 1, 3, null);
       case "ne_10m_admin_0_boundary_lines_land" -> {
         boolean isDisputedSouthSudanAndKenya = false;
         if (disputed) {
@@ -192,9 +192,9 @@ public class Boundary implements
             isDisputedSouthSudanAndKenya = COUNTRY_SS.equals(right);
           }
         }
-        yield isDisputedSouthSudanAndKenya ? new BoundaryInfo(2, 1, 4) :
+        yield isDisputedSouthSudanAndKenya ? new BoundaryInfo(2, 1, 4, null) :
           feature.hasTag("featurecla", "Lease limit") ? null :
-          new BoundaryInfo(2, 4, 4);
+          new BoundaryInfo(2, 4, 4, null);
       }
       case "ne_10m_admin_1_states_provinces_lines" -> {
         Double minZoom = Parse.parseDoubleOrNull(feature.getTag("min_zoom"));
