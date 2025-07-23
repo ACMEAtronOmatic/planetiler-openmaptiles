@@ -446,7 +446,7 @@ class TransportationTest extends AbstractLayerTest {
     assertFeatures(13, List.of(mapOf(
       "_layer", "transportation",
       "class", "motorway",
-      "_minzoom", 4
+      "_minzoom", 3
     ), Map.of(
       "_layer", "transportation_name",
       "class", "motorway",
