@@ -177,6 +177,22 @@ public class WaterName implements
       e.log(stats, "osm_marine_point",
         "Error getting geometry for OSM marine point " + element.source().id());
     }
+    // world lakes
+    if ("ne_10m_lakes".equals(table)) {
+      String name = feature.getString("name");
+      Integer scalerank = Parse.parseIntOrNull(feature.getTag("scalerank"));
+      if (name != null && scalerank != null) {
+        Integer minLabel = Parse.parseIntOrNull(feature.getTag("min_label"));
+        features.pointOnSurface(LAYER_NAME)
+          .setAttr(Fields.CLASS, FieldValues.CLASS_LAKE)
+          .setBufferPixels(BUFFER_SIZE)
+          .putAttrs(OmtLanguageUtils.getNames(feature.tags(), translations))
+          .setAttr(Fields.INTERMITTENT, 0)
+          .setAttr(Fields.WORLD_LAKE, true)
+          .setAttr(Fields.SCALERANK, scalerank)
+          .setMinZoom(minLabel);
+      }
+    }
 
     return null;
   }

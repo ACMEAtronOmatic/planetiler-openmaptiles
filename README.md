@@ -5,12 +5,6 @@ on [OpenMapTiles](https://github.com/openmaptiles/openmaptiles).
 
 ## How to run
 
-Using pre-built docker image:
-
-```bash
-docker run -v "$(pwd)/data":/data openmaptiles/planetiler-openmaptiles:latest --force --download --area=monaco
-```
-
 Or to build from source, after [installing Java 21+](https://adoptium.net/installation.html):
 
 ```bash

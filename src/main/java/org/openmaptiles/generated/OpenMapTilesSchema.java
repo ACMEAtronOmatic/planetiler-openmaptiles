@@ -731,6 +731,8 @@ public class OpenMapTilesSchema {
        * </ul>
        */
       public static final String DISPUTED = "disputed";
+      public static final String COUNTRY_CODE_A2 = "ISO3166-2";
+      public static final String COUNTRY_CODE_A3 = "ISO3166-1";
 
       /**
        * Field containing name of the disputed area (extracted from border relation in OSM, without spaces). For country
@@ -1299,6 +1301,8 @@ public class OpenMapTilesSchema {
        * </ul>
        */
       public static final String INTERMITTENT = "intermittent";
+      public static final String WORLD_LAKE = "world_lake";
+      public static final String SCALERANK = "scalerank";
     }
     /** Attribute values for map elements in the water_name layer. */
     final class FieldValues {

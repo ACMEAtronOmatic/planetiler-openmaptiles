@@ -17,6 +17,38 @@ class WaterNameTest extends AbstractLayerTest {
 
   @Test
   void testWaterNamePoint() {
+    // null name not included
+    assertFeatures(6, List.of(), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      new HashMap<>(Map.<String, Object>of(
+        "min_label", 4,
+        "scalerank", 1,
+        "wikidataid", "Q456"
+      )),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_lakes",
+      0
+    )));
+    assertFeatures(11, List.of(Map.of(
+      "_layer", "water_name",
+      "_type", "point",
+      "scalerank", 2,
+      "_minzoom", 3,
+      "world_lake", true,
+      "name", "Lake Superior"
+    )), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      new HashMap<>(Map.<String, Object>of(
+        "min_label", 3,
+        "name", "Lake Superior",
+        "wikidataid", "Q123",
+        "scalerank", 2
+      )),
+      OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
+      "ne_10m_lakes",
+      0
+    )));
+
     assertFeatures(11, List.of(Map.of(
       "_layer", "water"
     ), Map.of(

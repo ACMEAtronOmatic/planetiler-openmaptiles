@@ -190,6 +190,7 @@ class BoundaryTest extends AbstractLayerTest {
       "disputed", 0,
       "maritime", 0,
       "admin_level", 4,
+      "ISO3166-1", "USA",
 
       "_minzoom", 1,
       "_maxzoom", 4,
@@ -197,7 +198,8 @@ class BoundaryTest extends AbstractLayerTest {
     )), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
       Map.of(
-        "min_zoom", 7d
+        "min_zoom", 7d,
+        "adm0_a3", "USA"
       ),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_10m_admin_1_states_provinces_lines",
@@ -209,6 +211,7 @@ class BoundaryTest extends AbstractLayerTest {
       "disputed", 0,
       "maritime", 0,
       "admin_level", 4,
+      "ISO3166-1", "GBR",
 
       "_minzoom", 4,
       "_maxzoom", 4,
@@ -216,7 +219,8 @@ class BoundaryTest extends AbstractLayerTest {
     )), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
       Map.of(
-        "min_zoom", 7.6d
+        "min_zoom", 7.6d,
+        "adm0_a3", "GBR"
       ),
       OpenMapTilesProfile.NATURAL_EARTH_SOURCE,
       "ne_10m_admin_1_states_provinces_lines",
@@ -306,13 +310,15 @@ class BoundaryTest extends AbstractLayerTest {
     relation2.setTag("admin_level", "4");
     relation2.setTag("name", "State");
     relation2.setTag("boundary", "administrative");
+    relation2.setTag("ISO3166-2", "US-CA");
 
     assertFeatures(14, List.of(Map.of(
       "_layer", "boundary",
       "_type", "line",
       "disputed", 0,
       "maritime", 0,
-      "admin_level", 4
+      "admin_level", 4,
+      "ISO3166-2", "US-CA"
     )), process(lineFeatureWithRelation(
       Stream.concat(
         profile.preprocessOsmRelation(relation2).stream(),

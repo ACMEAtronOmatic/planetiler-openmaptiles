@@ -280,7 +280,7 @@ class TransportationTest extends AbstractLayerTest {
       "foot", "no",
       "horse", "no",
       "brunnel", "bridge",
-      "_minzoom", 4
+      "_minzoom", 3
     ), Map.ofEntries(
       entry("_layer", "transportation_name"),
       entry("class", "motorway"),
@@ -305,7 +305,7 @@ class TransportationTest extends AbstractLayerTest {
       "foot", "<null>",
       "horse", "<null>",
       "brunnel", "bridge",
-      "_minzoom", 4
+      "_minzoom", 3
     ), Map.ofEntries(
       entry("_layer", "transportation_name"),
       entry("class", "motorway"),
@@ -398,7 +398,7 @@ class TransportationTest extends AbstractLayerTest {
     assertFeatures(13, List.of(mapOf(
       "_layer", "transportation",
       "class", "motorway",
-      "_minzoom", 4
+      "_minzoom", 3
     ), Map.of(
       "_layer", "transportation_name",
       "class", "motorway",
@@ -483,7 +483,7 @@ class TransportationTest extends AbstractLayerTest {
     assertFeatures(13, List.of(mapOf(
       "_layer", "transportation",
       "class", "motorway",
-      "_minzoom", 4
+      "_minzoom", 3
     ), mapOf(
       "_layer", "transportation_name",
       "route_1_network", "US:I",
@@ -656,7 +656,7 @@ class TransportationTest extends AbstractLayerTest {
       "_layer", "transportation",
       "class", "motorway",
       "network", "us-interstate",
-      "_minzoom", 4
+      "_minzoom", 3
     ), Map.of(
       "_layer", "transportation_name",
       "class", "motorway",
