@@ -165,6 +165,11 @@ public class Boundary implements
       .replace("Extentof", "");
   }
 
+  private static boolean isUsCountyBorder(OsmElement.Relation relation) {
+    return relation.hasTag("nist:fips_code") ||
+    relation.hasTag("gnis:feature_id");
+  }
+
   @Override
   public void release() {
     regionGeometries.clear();
@@ -230,12 +235,17 @@ public class Boundary implements
         if (code != null) {
           regionNames.put(relation.id(), code);
         }
+        String borderType = null;
+        if (adminLevelValue == 6 && isUsCountyBorder(relation)) {
+          borderType = "county";
+        }
         return List.of(new BoundaryRelation(
           relation.id(),
           adminLevelValue,
           disputed,
           relation.getString("name"),
           disputed ? relation.getString("claimed_by") : null,
+          borderType,
           code,
           iso_a2
         ));
@@ -256,6 +266,7 @@ public class Boundary implements
       String iso_a2 = null;
       Set<Long> regionIds = new HashSet<>();
       boolean disputed = false;
+      boolean isUsCounty = false;
       // aggregate all borders this way is a part of - take the lowest
       // admin level, and assume it is disputed if any relation is disputed.
       for (var info : relationInfos) {
@@ -273,6 +284,9 @@ public class Boundary implements
         }
         if (minAdminLevel == 4 && iso_a2 == null) {
           iso_a2 = rel.iso3166_2;
+        }
+        if (rel.borderType == "county") {
+          isUsCounty = true;
         }
       }
 
@@ -293,6 +307,9 @@ public class Boundary implements
             minAdminLevel <= 8 ? 11 : 12;
         if (onlyOsmBoundaries && minAdminLevel <= 4) {
           minzoom = minAdminLevel == 2 ? (maritime ? 4 : 0) : 1;
+        }
+        if (minAdminLevel == 6 && isUsCounty) {
+          minzoom = 6;
         }
         if (addCountryNames && !regionIds.isEmpty()) {
           // save for later
@@ -496,6 +513,7 @@ public class Boundary implements
     boolean disputed,
     String name,
     String claimedBy,
+    String borderType,
     String iso3166alpha3,
     String iso3166_2
   ) implements OsmRelationInfo {
