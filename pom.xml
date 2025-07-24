@@ -9,8 +9,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <planetiler.version>0.7-SNAPSHOT</planetiler.version>
-    <junit.version>5.10.1</junit.version>
+    <planetiler.version>0.8.4</planetiler.version>
+    <junit.version>5.11.4</junit.version>
 
     <mainClass>org.openmaptiles.OpenMapTilesMain</mainClass>
     <image.version>${project.version}</image.version>
@@ -67,7 +67,7 @@
     <dependency>
       <groupId>org.commonmark</groupId>
       <artifactId>commonmark</artifactId>
-      <version>0.21.0</version>
+      <version>0.22.0</version>
     </dependency>
 
     <!-- To use test utilities: -->
@@ -115,7 +115,7 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.42.0</version>
+        <version>2.43.0</version>
         <configuration>
           <java>
             <importOrder/>
@@ -171,7 +171,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.7.1</version>
         <dependencies>
           <dependency>
             <groupId>com.onthegomap.planetiler</groupId>
@@ -229,7 +229,7 @@
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>3.4.2</version>
         <configuration>
           <from>
             <image>

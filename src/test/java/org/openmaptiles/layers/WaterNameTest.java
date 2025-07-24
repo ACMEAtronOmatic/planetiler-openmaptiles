@@ -94,7 +94,7 @@ class WaterNameTest extends AbstractLayerTest {
       "_maxzoom", 14,
       "_minpixelsize", "waterway".length() * 6d
     )), process(SimpleFeature.create(
-      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1))),
+      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1E-7))),
       new HashMap<>(Map.<String, Object>of(
         "name", "waterway",
         "name:es", "waterway es",
@@ -144,7 +144,7 @@ class WaterNameTest extends AbstractLayerTest {
       "_maxzoom", 14,
       "_minpixelsize", "waterway".length() * 6d
     )), process(SimpleFeature.create(
-      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1))),
+      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1E-7))),
       new HashMap<>(Map.<String, Object>of(
         "name", "waterway",
         "name:es", "waterway es",
@@ -158,7 +158,7 @@ class WaterNameTest extends AbstractLayerTest {
   }
 
   @Test
-  void testWaterNameBay() {
+  void testWaterNameBaySmall() {
     assertFeatures(11, List.of(), process(SimpleFeature.create(
       newLineString(0, 0, 1, 1),
       new HashMap<>(Map.<String, Object>of(
@@ -178,6 +178,55 @@ class WaterNameTest extends AbstractLayerTest {
       "_minzoom", 9,
       "_maxzoom", 14,
       "_minpixelsize", "bay".length() * 6d
+    ), Map.of(
+      "name", "bay",
+      "name:es", "bay es",
+
+      "_layer", "water_name",
+      "_type", "point",
+      "_minzoom", 3,
+      "_maxzoom", 8,
+      "_minpixelsize", 128d
+    )), process(SimpleFeature.create(
+      GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1E-7))),
+      new HashMap<>(Map.<String, Object>of(
+        "name", "bay",
+        "name:es", "bay es",
+        "natural", "bay"
+      )),
+      OpenMapTilesProfile.OSM_SOURCE,
+      null,
+      10
+    )));
+  }
+
+  @Test
+  void testWaterNameBayBig() {
+    assertFeatures(11, List.of(), process(SimpleFeature.create(
+      newLineString(0, 0, 1, 1),
+      new HashMap<>(Map.<String, Object>of(
+        "OSM_ID", -10
+      )),
+      OpenMapTilesProfile.LAKE_CENTERLINE_SOURCE,
+      null,
+      0
+    )));
+    assertFeatures(10, List.of(Map.of(
+      "name", "bay",
+      "name:es", "bay es",
+
+      "_layer", "water_name",
+      "_type", "line",
+      "_minzoom", 9,
+      "_maxzoom", 14
+    ), Map.of(
+      "name", "bay",
+      "name:es", "bay es",
+
+      "_layer", "water_name",
+      "_type", "point",
+      "_minzoom", 3,
+      "_maxzoom", 8
     )), process(SimpleFeature.create(
       GeoUtils.worldToLatLonCoords(rectangle(0, Math.sqrt(1))),
       new HashMap<>(Map.<String, Object>of(

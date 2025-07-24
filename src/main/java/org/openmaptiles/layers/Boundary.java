@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021, MapTiler.com & OpenMapTiles contributors.
+Copyright (c) 2024, MapTiler.com & OpenMapTiles contributors.
 All rights reserved.
 
 Code license: BSD 3-Clause License
@@ -79,6 +79,8 @@ import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
 import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
+import org.openmaptiles.generated.Tables;
+import org.openmaptiles.util.OmtLanguageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +97,7 @@ public class Boundary implements
   OpenMapTilesProfile.NaturalEarthProcessor,
   OpenMapTilesProfile.OsmRelationPreprocessor,
   OpenMapTilesProfile.OsmAllProcessor,
+  Tables.OsmBoundaryPolygon.Handler,
   OpenMapTilesProfile.FeaturePostProcessor,
   OpenMapTilesProfile.FinishHandler {
 
@@ -118,6 +121,8 @@ public class Boundary implements
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Boundary.class);
   private static final double COUNTRY_TEST_OFFSET = GeoUtils.metersToPixelAtEquator(0, 10) / 256d;
+  private static final String COUNTRY_KE = "Kenya";
+  private static final String COUNTRY_SS = "South Sudan";
   private final Stats stats;
   private final boolean addCountryNames;
   private final boolean onlyOsmBoundaries;
@@ -127,6 +132,7 @@ public class Boundary implements
   private final Map<Long, List<Geometry>> regionGeometries = new HashMap<>();
   private final Map<CountryBoundaryComponent, List<Geometry>> boundariesToMerge = new HashMap<>();
   private final PlanetilerConfig config;
+  private final Translations translations;
 
   public Boundary(Translations translations, PlanetilerConfig config, Stats stats) {
     this.config = config;
@@ -141,6 +147,7 @@ public class Boundary implements
       false
     );
     this.stats = stats;
+    this.translations = translations;
   }
 
   private static boolean isDisputed(Map<String, Object> tags) {
@@ -174,8 +181,21 @@ public class Boundary implements
     BoundaryInfo info = switch (table) {
       case "ne_110m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 0, 0, null);
       case "ne_50m_admin_0_boundary_lines_land" -> new BoundaryInfo(2, 1, 3, null);
-      case "ne_10m_admin_0_boundary_lines_land" -> feature.hasTag("featurecla", "Lease Limit") ? null :
-        new BoundaryInfo(2, 4, 4, null);
+      case "ne_10m_admin_0_boundary_lines_land" -> {
+        boolean isDisputedSouthSudanAndKenya = false;
+        if (disputed) {
+          String left = feature.getString("adm0_left");
+          String right = feature.getString("adm0_right");
+          if (COUNTRY_SS.equals(left)) {
+            isDisputedSouthSudanAndKenya = COUNTRY_KE.equals(right);
+          } else if (COUNTRY_KE.equals(left)) {
+            isDisputedSouthSudanAndKenya = COUNTRY_SS.equals(right);
+          }
+        }
+        yield isDisputedSouthSudanAndKenya ? new BoundaryInfo(2, 1, 4, null) :
+          feature.hasTag("featurecla", "Lease limit") ? null :
+          new BoundaryInfo(2, 4, 4, null);
+      }
       case "ne_10m_admin_1_states_provinces_lines" -> {
         Double minZoom = Parse.parseDoubleOrNull(feature.getTag("min_zoom"));
         String iso_a3 = feature.getString("adm0_a3");
@@ -313,6 +333,15 @@ public class Boundary implements
         }
       }
     }
+  }
+
+  @Override
+  public void process(Tables.OsmBoundaryPolygon element, FeatureCollector features) {
+    features.polygon(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
+      .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
+      .setAttr(OpenMapTilesSchema.Boundary.Fields.CLASS, element.boundary())
+      .setMinPixelSizeBelowZoom(13, 4) // for Z4: `sql_filter: area>power(ZRES3,2)`, etc.
+      .setMinZoom(4);
   }
 
   @Override

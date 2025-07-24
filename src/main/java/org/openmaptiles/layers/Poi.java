@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021, MapTiler.com & OpenMapTiles contributors.
+Copyright (c) 2024, MapTiler.com & OpenMapTiles contributors.
 All rights reserved.
 
 Code license: BSD 3-Clause License
@@ -139,6 +139,11 @@ public class Poi implements
   }
 
   private String poiClass(String subclass, String mappingKey) {
+    // Special case subclass collision between office=university and amenity=university
+    if ("amenity".equals(mappingKey) && "university".equals(subclass)) {
+      return FieldValues.CLASS_COLLEGE;
+    }
+
     subclass = coalesce(subclass, "");
     return classMapping.getOrElse(Map.of(
       "subclass", subclass,

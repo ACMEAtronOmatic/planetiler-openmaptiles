@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021, MapTiler.com & OpenMapTiles contributors.
+Copyright (c) 2024, MapTiler.com & OpenMapTiles contributors.
 All rights reserved.
 
 Code license: BSD 3-Clause License
@@ -139,10 +139,22 @@ public class Transportation implements
   private static final Set<String> ACCESS_NO_VALUES = Set.of(
     "private", "no"
   );
-  private static final Set<RouteNetwork> TRUNK_AS_MOTORWAY_BY_NETWORK = Set.of(
+  // ... and also Z4_MOTORWAY_NY_NETWORK, except those in Z5_MOTORWAYS_BY_NETWORK:
+  private static final Set<RouteNetwork> Z5_TRUNK_BY_NETWORK = Set.of(
     RouteNetwork.CA_TRANSCANADA,
     RouteNetwork.CA_PROVINCIAL_ARTERIAL,
-    RouteNetwork.US_INTERSTATE
+    RouteNetwork.US_INTERSTATE,
+    RouteNetwork.US_HIGHWAY,
+    RouteNetwork.GB_MOTORWAY,
+    RouteNetwork.GB_TRUNK,
+    RouteNetwork.IE_MOTORWAY,
+    RouteNetwork.IE_NATIONAL,
+    RouteNetwork.E_ROAD,
+    RouteNetwork.A_ROAD
+  );
+  private static final Set<RouteNetwork> Z5_MOTORWAYS_BY_NETWORK = Set.of(
+    RouteNetwork.GB_TRUNK,
+    RouteNetwork.US_HIGHWAY
   );
   private static final Set<String> CA_AB_PRIMARY_AS_ARTERIAL_BY_REF = Set.of(
     "2", "3", "4"
@@ -192,7 +204,7 @@ public class Transportation implements
       entry(FieldValues.CLASS_BUS_GUIDEWAY, 11),
       entry(FieldValues.CLASS_SECONDARY, 9),
       entry(FieldValues.CLASS_PRIMARY, 7),
-      entry(FieldValues.CLASS_TRUNK, 5),
+      entry(FieldValues.CLASS_TRUNK, 6),
       entry(FieldValues.CLASS_MOTORWAY, 4)
     );
   }
@@ -243,6 +255,40 @@ public class Transportation implements
     return "residential".equals(highway) || "unclassified".equals(highway);
   }
 
+  private static boolean isTrunkForZ5(String highway, List<RouteRelation> routeRelations) {
+    // Allow trunk roads that are part of a nation's most important route network to show at z5
+    if (!"trunk".equals(highway)) {
+      return false;
+    }
+    return routeRelations.stream()
+      .map(RouteRelation::networkType)
+      .filter(Objects::nonNull)
+      .anyMatch(Z5_TRUNK_BY_NETWORK::contains);
+  }
+
+  private static boolean isMotorwayWithNetworkForZ4(List<RouteRelation> routeRelations) {
+    // All roads in network included in osm_national_network except gb-trunk and us-highway
+    return routeRelations.stream()
+      .map(RouteRelation::networkType)
+      .filter(Objects::nonNull)
+      .filter(nt -> !Z5_MOTORWAYS_BY_NETWORK.contains(nt))
+      .anyMatch(Z5_TRUNK_BY_NETWORK::contains);
+  }
+
+  private static boolean isMotorwayWoNetworkForZ4(List<RouteRelation> routeRelations) {
+    // All motorways without network (e.g. EU, Asia, South America)
+    return routeRelations.stream()
+      .map(RouteRelation::networkType)
+      .noneMatch(Objects::nonNull);
+  }
+
+  private static boolean isMotorwayForZ4(List<RouteRelation> routeRelations) {
+    if (isMotorwayWoNetworkForZ4(routeRelations)) {
+      return true;
+    }
+    return isMotorwayWithNetworkForZ4(routeRelations);
+  }
+
   private static boolean isDrivewayOrParkingAisle(String service) {
     return FieldValues.SERVICE_PARKING_AISLE.equals(service) || FieldValues.SERVICE_DRIVEWAY.equals(service);
   }
@@ -290,6 +336,9 @@ public class Transportation implements
       RouteNetwork networkType = null;
       String network = relation.getString("network");
       String ref = relation.getString("ref");
+      String name = nullIfEmpty(relation.getString("name"));
+      String colour = coalesce(
+        nullIfEmpty(relation.getString("colour")), nullIfEmpty(relation.getString("ref:colour")));
 
       if ("US:I".equals(network)) {
         networkType = RouteNetwork.US_INTERSTATE;
@@ -328,7 +377,8 @@ public class Transportation implements
       };
 
       if (network != null || rank < 3) {
-        return List.of(new RouteRelation(coalesce(ref, ""), network, networkType, (byte) rank, relation.id()));
+        return List
+          .of(new RouteRelation(coalesce(ref, ""), network, name, colour, networkType, (byte) rank, relation.id()));
       }
     }
     return null;
@@ -366,6 +416,7 @@ public class Transportation implements
               };
               result.add(new RouteRelation(refMatcher.group(),
                 networkType == null ? null : networkType.network,
+                null, null,
                 networkType, (byte) -1, 0));
             }
           } catch (GeometryException e) {
@@ -391,7 +442,9 @@ public class Transportation implements
                 case "trunk", "primary" -> RouteNetwork.IE_NATIONAL;
                 default -> RouteNetwork.IE_REGIONAL;
               };
-              result.add(new RouteRelation(refMatcher.group(), networkType.network, networkType, (byte) -1, 0));
+              result.add(new RouteRelation(refMatcher.group(),
+                networkType.network, null, null,
+                networkType, (byte) -1, 0));
             }
           } catch (GeometryException e) {
             e.log(stats, "omt_transportation_name_ie_test",
@@ -406,7 +459,7 @@ public class Transportation implements
 
   RouteRelation getRouteRelation(Tables.OsmHighwayLinestring element) {
     List<RouteRelation> all = getRouteRelations(element);
-    return all.isEmpty() ? null : all.get(0);
+    return all.isEmpty() ? null : all.getFirst();
   }
 
   @Override
@@ -441,6 +494,8 @@ public class Transportation implements
       Integer rampAboveZ12 = (highwayRamp || element.isRamp()) ? 1 : null;
       Integer rampBelowZ12 = highwayRamp ? 1 : null;
 
+      boolean expressway = element.expressway() && !"motorway".equals(highway) && !(element.isRamp() || highwayRamp);
+
       FeatureCollector.Feature feature = features.line(LAYER_NAME).setBufferPixels(BUFFER_SIZE)
         // main attributes at all zoom levels (used for grouping <= z8)
         .setAttr(Fields.CLASS, highwayClass)
@@ -448,7 +503,7 @@ public class Transportation implements
         .setAttr(Fields.NETWORK, networkType != null ? networkType.name : null)
         .setAttrWithMinSize(Fields.BRUNNEL, brunnel(element.isBridge(), element.isTunnel(), element.isFord()), 4, 4, 12)
         // z8+
-        .setAttrWithMinzoom(Fields.EXPRESSWAY, element.expressway() && !"motorway".equals(highway) ? 1 : null, 8)
+        .setAttrWithMinzoom(Fields.EXPRESSWAY, expressway ? 1 : null, 8)
         // z9+
         .setAttrWithMinSize(Fields.LAYER, nullIfLong(element.layer(), 0), 4, 9, 12)
         .setAttrWithMinzoom(Fields.BICYCLE, nullIfEmpty(element.bicycle()), 9)
@@ -485,6 +540,7 @@ public class Transportation implements
       }
     }
     String highway = element.highway();
+    String construction = element.construction();
 
     int minzoom;
     if ("pier".equals(element.manMade())) {
@@ -498,18 +554,22 @@ public class Transportation implements
         case FieldValues.CLASS_TRACK, FieldValues.CLASS_PATH -> routeRank == 1 ? 12 :
           (z13Paths || !nullOrEmpty(element.name()) || routeRank <= 2 || !nullOrEmpty(element.sacScale())) ? 13 : 14;
         case FieldValues.CLASS_TRUNK -> {
-          // trunks in some networks to have same min. zoom as highway = "motorway"
-          String clazz = routeRelations.stream()
-            .map(RouteRelation::networkType)
-            .filter(Objects::nonNull)
-            .anyMatch(TRUNK_AS_MOTORWAY_BY_NETWORK::contains) ? FieldValues.CLASS_MOTORWAY : FieldValues.CLASS_TRUNK;
-          yield MINZOOMS.getOrDefault(clazz, Integer.MAX_VALUE);
+          boolean z5trunk = isTrunkForZ5(highway, routeRelations);
+          // and if it is good for Z5, it may be good also for Z4 (see CLASS_MOTORWAY bellow):
+          String clazz = FieldValues.CLASS_TRUNK;
+          if (z5trunk && isMotorwayWithNetworkForZ4(routeRelations)) {
+            clazz = FieldValues.CLASS_MOTORWAY;
+            z5trunk = false;
+          }
+          yield (z5trunk) ? 5 : MINZOOMS.getOrDefault(clazz, Integer.MAX_VALUE);
         }
+        case FieldValues.CLASS_MOTORWAY -> isMotorwayForZ4(routeRelations) ?
+          MINZOOMS.getOrDefault(FieldValues.CLASS_MOTORWAY, Integer.MAX_VALUE) : 5;
         default -> MINZOOMS.getOrDefault(baseClass, Integer.MAX_VALUE);
       };
     }
 
-    if (isLink(highway)) {
+    if (isLink(highway) || isLink(construction)) {
       minzoom = Math.max(minzoom, 9);
     }
     return minzoom;
@@ -648,7 +708,9 @@ public class Transportation implements
     GB_PRIMARY("gb-primary", "omt-gb-primary"),
     IE_MOTORWAY("ie-motorway", "omt-ie-motorway"),
     IE_NATIONAL("ie-national", "omt-ie-national"),
-    IE_REGIONAL("ie-regional", "omt-ie-regional");
+    IE_REGIONAL("ie-regional", "omt-ie-regional"),
+    E_ROAD("e-road", null),
+    A_ROAD("a-road", null);
 
     final String name;
     final String network;
@@ -663,6 +725,8 @@ public class Transportation implements
   record RouteRelation(
     String ref,
     String network,
+    String name,
+    String colour,
     RouteNetwork networkType,
     byte rank,
     @Override long id
@@ -674,6 +738,8 @@ public class Transportation implements
         MemoryEstimator.estimateSize(rank) +
         POINTER_BYTES + estimateSize(ref) +
         POINTER_BYTES + estimateSize(network) +
+        POINTER_BYTES + estimateSize(name) +
+        POINTER_BYTES + estimateSize(colour) +
         POINTER_BYTES + // networkType
         MemoryEstimator.estimateSizeLong(id);
     }
