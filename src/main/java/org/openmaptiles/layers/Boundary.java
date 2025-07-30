@@ -166,7 +166,7 @@ public class Boundary implements
 
   private static boolean isUsCountyBorder(OsmElement.Relation relation) {
     return relation.hasTag("nist:fips_code") ||
-    relation.hasTag("gnis:feature_id");
+      relation.hasTag("gnis:feature_id");
   }
 
   @Override
