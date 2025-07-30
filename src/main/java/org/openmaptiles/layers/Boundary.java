@@ -308,7 +308,7 @@ public class Boundary implements
           minzoom = minAdminLevel == 2 ? (maritime ? 4 : 0) : 1;
         }
         if (minAdminLevel == 6 && isUsCounty) {
-          minzoom = 6;
+          minzoom = 4;
         }
         if (addCountryNames && !regionIds.isEmpty()) {
           // save for later
