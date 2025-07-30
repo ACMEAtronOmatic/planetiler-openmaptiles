@@ -343,9 +343,9 @@ class BoundaryTest extends AbstractLayerTest {
       "_layer", "boundary",
       "_type", "line",
       "_minzoom", 4,
-    "admin_level", 6,
-    "disputed", 0,
-    "maritime", 0
+      "admin_level", 6,
+      "disputed", 0,
+      "maritime", 0
     )), process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(relation1),
       Map.of())));
@@ -367,9 +367,9 @@ class BoundaryTest extends AbstractLayerTest {
       "_layer", "boundary",
       "_type", "line",
       "_minzoom", 4,
-    "admin_level", 6,
-    "disputed", 0,
-    "maritime", 0
+      "admin_level", 6,
+      "disputed", 0,
+      "maritime", 0
     )), process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(relation1),
       Map.of())));
@@ -390,9 +390,9 @@ class BoundaryTest extends AbstractLayerTest {
       "_layer", "boundary",
       "_type", "line",
       "_minzoom", 9,
-    "admin_level", 6,
-    "disputed", 0,
-    "maritime", 0
+      "admin_level", 6,
+      "disputed", 0,
+      "maritime", 0
     )), process(lineFeatureWithRelation(
       profile.preprocessOsmRelation(relation1),
       Map.of())));
