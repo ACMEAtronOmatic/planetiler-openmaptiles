@@ -307,7 +307,7 @@ public class Boundary implements
         if (onlyOsmBoundaries && minAdminLevel <= 4) {
           minzoom = minAdminLevel == 2 ? (maritime ? 4 : 0) : 1;
         }
-        if (minAdminLevel == 6 && isUsCounty) {
+        if ((minAdminLevel == 5 || minAdminLevel == 6) && isUsCounty) {
           minzoom = 4;
         }
         if (addCountryNames && !regionIds.isEmpty()) {
@@ -346,7 +346,8 @@ public class Boundary implements
             .setMinZoom(minzoom)
             .setAttr(Fields.CLAIMED_BY, claimedBy)
             .setAttr(Fields.COUNTRY_CODE_A2, iso_a2)
-            .setAttr(Fields.DISPUTED_NAME, editName(disputedName));
+            .setAttr(Fields.DISPUTED_NAME, editName(disputedName))
+            .setAttr(Fields.CLASS, isUsCounty ? "us_county" : null);
         }
       }
     }
