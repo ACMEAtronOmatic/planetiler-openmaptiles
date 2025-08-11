@@ -401,6 +401,40 @@ class BoundaryTest extends AbstractLayerTest {
   }
 
   @Test
+  void testOsmCountySharedBoundary() {
+    // County boundaries that are also part of regional boundary relations
+    // gets the class us_county
+    var relation1 = new OsmElement.Relation(1);
+    relation1.setTag("admin_level", "6");
+    relation1.setTag("type", "boundary");
+    relation1.setTag("border_type", "county");
+    relation1.setTag("boundary", "administrative");
+    relation1.setTag("name", "county1");
+    relation1.setTag("gnis:feature_id", "123");
+
+    var relation2 = new OsmElement.Relation(2);
+    relation2.setTag("admin_level", "5");
+    relation2.setTag("type", "boundary");
+    relation2.setTag("boundary", "administrative");
+    relation2.setTag("name", "Middle Tennessee");
+
+    assertFeatures(14, List.of(Map.of(
+      "_layer", "boundary",
+      "_type", "line",
+      "_minzoom", 4,
+      "disputed", 0,
+      "maritime", 0,
+      "admin_level", 5,
+      "class", "us_county"
+    )), process(lineFeatureWithRelation(
+      Stream.concat(
+        profile.preprocessOsmRelation(relation2).stream(),
+        profile.preprocessOsmRelation(relation1).stream()
+      ).toList(),
+      Map.of())));
+  }
+
+  @Test
   void testOsmBoundarySetsMaritimeFromWay() {
     var relation1 = new OsmElement.Relation(1);
     relation1.setTag("type", "boundary");
