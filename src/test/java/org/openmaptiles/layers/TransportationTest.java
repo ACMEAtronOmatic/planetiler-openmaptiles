@@ -2264,7 +2264,6 @@ class TransportationTest extends AbstractLayerTest {
 
   @Test
   void testNetworkQualifiedTrunkGetsZ5ButNotMotorway() {
-    // Test that network-qualified trunks get z5 (or z4 if they qualify for z4)
     // Network qualification should override length check
     var rel = new OsmElement.Relation(1);
     rel.setTag("type", "route");
@@ -2287,7 +2286,7 @@ class TransportationTest extends AbstractLayerTest {
         "_layer", "transportation",
         "class", "trunk", // don't upgrade to motorway
         "network", "us-interstate",
-        "_minzoom", 4 // US:I network qualifies for z4
+        "_minzoom", 3 // US interstates get minzoom 3
       ),
       Map.of(
         "_layer", "transportation_name",
