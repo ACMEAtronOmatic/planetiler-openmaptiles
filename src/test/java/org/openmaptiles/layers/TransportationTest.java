@@ -2279,7 +2279,7 @@ class TransportationTest extends AbstractLayerTest {
       )
     ));
 
-    // US:I network qualifies for z4, not z5
+    // US:I network qualifies for z3, not z5
     // Network-qualified trunks create both transportation and transportation_name features
     assertFeatures(5, List.of(
       Map.of(
