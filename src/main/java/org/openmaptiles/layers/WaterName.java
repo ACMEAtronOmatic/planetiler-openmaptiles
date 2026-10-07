@@ -146,7 +146,6 @@ public class WaterName implements
         }
       }
     }
-
     // world lakes
     if ("ne_10m_lakes".equals(table)) {
       String name = feature.getString("name");
@@ -233,7 +232,7 @@ public class WaterName implements
 
   @Override
   public void process(Tables.OsmWaterPolygon element, FeatureCollector features) {
-    if (nullIfEmpty(element.name()) != null) {
+    if (nullIfEmpty(element.name()) != null && !"swimming_pool".equals(element.leisure())) {
       Geometry centerlineGeometry = lakeCenterlines.get(element.source().id());
       int minzoomCL = MINZOOM_BAY;
       String place = element.place();

@@ -40,6 +40,7 @@ import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.carrotsearch.hppc.LongIntMap;
 import com.onthegomap.planetiler.FeatureCollector;
+import com.onthegomap.planetiler.ForwardingProfile;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.collection.Hppc;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
@@ -49,6 +50,7 @@ import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
@@ -74,7 +76,7 @@ public class MountainPeak implements
   OpenMapTilesSchema.MountainPeak,
   Tables.OsmPeakPoint.Handler,
   Tables.OsmMountainLinestring.Handler,
-  OpenMapTilesProfile.FeaturePostProcessor {
+  ForwardingProfile.LayerPostProcessor {
 
   /*
    * Mountain peaks come from OpenStreetMap data and are ranked by importance (based on if they
@@ -114,13 +116,13 @@ public class MountainPeak implements
   @Override
   public void process(Tables.OsmPeakPoint element, FeatureCollector features) {
     Double meters = Parse.meters(element.ele());
-    if (meters != null && Math.abs(meters) < 10_000) {
+    if ((meters != null && Math.abs(meters) < 10_000) || nullIfEmpty(element.name()) != null) {
       var feature = features.point(LAYER_NAME)
         .setAttr(Fields.CLASS, element.source().getTag("natural"))
         .putAttrs(OmtLanguageUtils.getNames(element.source().tags(), translations))
-        .putAttrs(elevationTags(meters))
+        .putAttrs(meters != null ? elevationTags(meters) : Map.of())
         .setSortKeyDescending(
-          meters.intValue() +
+          (meters != null ? meters.intValue() : 0) +
             (nullIfEmpty(element.wikipedia()) != null ? 10_000 : 0) +
             (nullIfEmpty(element.name()) != null ? 10_000 : 0)
         )
@@ -180,8 +182,8 @@ public class MountainPeak implements
       // now that we have accurate ranks, remove anything outside the desired buffer
       if (!insideTileBuffer(feature)) {
         items.set(i, null);
-      } else if (!feature.attrs().containsKey(Fields.RANK)) {
-        feature.attrs().put(Fields.RANK, gridrank);
+      } else if (!feature.tags().containsKey(Fields.RANK)) {
+        feature.tags().put(Fields.RANK, gridrank);
       }
     }
     return items;
@@ -196,7 +198,7 @@ public class MountainPeak implements
       Geometry geom = feature.geometry().decode();
       return !(geom instanceof Point point) || (insideTileBuffer(point.getX()) && insideTileBuffer(point.getY()));
     } catch (GeometryException e) {
-      e.log(stats, "mountain_peak_decode_point", "Error decoding mountain peak point: " + feature.attrs());
+      e.log(stats, "mountain_peak_decode_point", "Error decoding mountain peak point: " + feature.tags());
       return false;
     }
   }
