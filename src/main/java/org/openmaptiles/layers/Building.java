@@ -39,9 +39,11 @@ import static com.onthegomap.planetiler.util.MemoryEstimator.CLASS_HEADER_BYTES;
 import static com.onthegomap.planetiler.util.Parse.parseDoubleOrNull;
 import static java.util.Map.entry;
 import static org.openmaptiles.util.Utils.coalesce;
+import static org.openmaptiles.util.Utils.nullIfEmpty;
 
 import com.onthegomap.planetiler.FeatureCollector;
 import com.onthegomap.planetiler.FeatureMerge;
+import com.onthegomap.planetiler.ForwardingProfile;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.config.PlanetilerConfig;
 import com.onthegomap.planetiler.geo.GeometryException;
@@ -49,11 +51,11 @@ import com.onthegomap.planetiler.reader.osm.OsmElement;
 import com.onthegomap.planetiler.reader.osm.OsmRelationInfo;
 import com.onthegomap.planetiler.stats.Stats;
 import com.onthegomap.planetiler.util.MemoryEstimator;
+import com.onthegomap.planetiler.util.Parse;
 import com.onthegomap.planetiler.util.Translations;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.openmaptiles.OpenMapTilesProfile;
 import org.openmaptiles.generated.OpenMapTilesSchema;
 import org.openmaptiles.generated.Tables;
 
@@ -67,8 +69,8 @@ import org.openmaptiles.generated.Tables;
 public class Building implements
   OpenMapTilesSchema.Building,
   Tables.OsmBuildingPolygon.Handler,
-  OpenMapTilesProfile.FeaturePostProcessor,
-  OpenMapTilesProfile.OsmRelationPreprocessor {
+  ForwardingProfile.LayerPostProcessor,
+  ForwardingProfile.OsmRelationPreprocessor {
 
   /*
    * Emit all buildings from OSM data at z14.
@@ -138,14 +140,14 @@ public class Building implements
       color = color.toLowerCase(Locale.ROOT);
     }
 
-    Double height = coalesce(
-      parseDoubleOrNull(element.height()),
-      parseDoubleOrNull(element.buildingheight())
-    );
-    Double minHeight = coalesce(
-      parseDoubleOrNull(element.minHeight()),
-      parseDoubleOrNull(element.buildingminHeight())
-    );
+    Double height = Parse.meters(coalesce(
+      nullIfEmpty(element.height()),
+      nullIfEmpty(element.buildingheight())
+    ));
+    Double minHeight = Parse.meters(coalesce(
+      nullIfEmpty(element.minHeight()),
+      nullIfEmpty(element.buildingminHeight())
+    ));
     Double levels = coalesce(
       parseDoubleOrNull(element.levels()),
       parseDoubleOrNull(element.buildinglevels())
