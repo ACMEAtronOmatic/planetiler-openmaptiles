@@ -499,12 +499,7 @@ public class Transportation implements
         return;
       }
       var minZoomAndNewClass = getMinzoomAndClass(element, highwayClass);
-      int minzoom;
-      if (networkType == RouteNetwork.US_INTERSTATE) {
-        minzoom = 3;
-      } else {
-        minzoom = minZoomAndNewClass.minzoom;
-      }
+      int minzoom = minZoomAndNewClass.minzoom;
 
       if (minzoom > config.maxzoom()) {
         return;
@@ -583,6 +578,8 @@ public class Transportation implements
       minzoom = 13;
     } else if (isResidentialOrUnclassified(highway)) {
       minzoom = 12;
+    } else if (!routeRelations.isEmpty() && routeRelations.getFirst().networkType == RouteNetwork.US_INTERSTATE) {
+      minzoom = 3;
     } else {
       String baseClass = highwayClass.replace("_construction", "");
       minzoom = switch (baseClass) {
